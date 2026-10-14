@@ -31,9 +31,11 @@ function createApp() {
 
   app.use(
     cors({
+      // Reflect any origin when CORS_ALLOW_ALL is enabled (default), so every
+      // frontend URL is accepted while still supporting credentialed requests.
       origin(origin, cb) {
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-        return cb(new Error('CORS: origin not allowed'));
+        if (!origin || env.CORS_ALLOW_ALL || allowedOrigins.includes(origin)) return cb(null, true);
+        return cb(null, false);
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

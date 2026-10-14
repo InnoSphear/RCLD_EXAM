@@ -27,6 +27,7 @@ const env = {
   GROQ_MODEL: process.env.GROQ_MODEL || 'openai/gpt-oss-20b',
   AUTO_FINALIZE_INTERVAL_MS: parseInt(process.env.AUTO_FINALIZE_INTERVAL_MS || '30000', 10),
   TRUST_PROXY: bool(process.env.TRUST_PROXY, false),
+  CORS_ALLOW_ALL: bool(process.env.CORS_ALLOW_ALL, true),
 };
 
 function validateEnv() {
