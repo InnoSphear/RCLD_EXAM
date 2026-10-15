@@ -23,10 +23,12 @@ router.get('/export', requirePermission('students.export'), c.exportStudents);
 router.post('/import/preview', requirePermission('students.import'), makeUploader('students').single('file'), c.previewImport);
 router.post('/import/confirm', requirePermission('students.import'), c.confirmImport);
 router.post('/bulk-status', requirePermission('students.edit'), c.bulkStatus);
+router.post('/bulk-delete', requirePermission('students.delete'), c.bulkDeleteStudents);
 router.post('/reset-password', requirePermission('students.edit'), c.resetPassword);
 router.get('/', requirePermission('students.view'), c.listStudents);
 router.post('/', requirePermission('students.register'), validate(studentRules), c.registerStudent);
 router.get('/:id', requirePermission('students.view'), c.getStudent);
 router.patch('/:id', requirePermission('students.edit'), c.updateStudent);
+router.delete('/:id', requirePermission('students.delete'), c.deleteStudent);
 
 module.exports = router;

@@ -29,6 +29,14 @@ const adminDashboard = asyncHandler(async (req, res) => {
 
   const recentActivity = await AuditLog.find().sort({ createdAt: -1 }).limit(15).populate('actor', 'name role');
 
+  const questionsBySubject = await Question.aggregate([
+    { $group: { _id: '$subject', count: { $sum: 1 }, published: { $sum: { $cond: [{ $eq: ['$status', 'published'] }, 1, 0] } } } },
+    { $lookup: { from: 'subjects', localField: '_id', foreignField: '_id', as: 's' } },
+    { $unwind: { path: '$s', preserveNullAndEmptyArrays: true } },
+    { $project: { _id: 0, subjectId: '$_id', subject: { $ifNull: ['$s.name', 'Unassigned'] }, count: 1, published: 1 } },
+    { $sort: { count: -1 } },
+  ]);
+
   res.json({
     success: true,
     data: {
@@ -44,6 +52,7 @@ const adminDashboard = asyncHandler(async (req, res) => {
       },
       upcomingExams,
       activeExams,
+      questionsBySubject,
       recentActivity,
       serverTime: new Date(),
     },

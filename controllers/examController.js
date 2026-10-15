@@ -148,6 +148,20 @@ const updateExam = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { exam } });
 });
 
+// DELETE /api/exams/:id
+const deleteExam = asyncHandler(async (req, res) => {
+  if (!hasPermission(req.user, 'exams.delete')) throw new ApiError(403, 'Missing permission: exams.delete');
+  const exam = await Exam.findById(req.params.id);
+  if (!exam) throw new ApiError(404, 'Exam not found');
+  await Promise.all([
+    ExamAttempt.deleteMany({ exam: exam._id }),
+    Result.deleteMany({ exam: exam._id }),
+    Exam.deleteOne({ _id: exam._id }),
+  ]);
+  await audit(req, 'exam.delete', 'Exam', exam._id, `deleted exam "${exam.title}"`);
+  res.json({ success: true, message: 'Exam deleted' });
+});
+
 // POST /api/exams/:id/status  { status }
 const setStatus = asyncHandler(async (req, res) => {
   const exam = await Exam.findById(req.params.id);
@@ -274,4 +288,4 @@ const previewQuestions = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { items, total, page, limit } });
 });
 
-module.exports = { listExams, getExam, createExam, updateExam, setStatus, releaseResults, monitor, listAttempts, previewQuestions };
+module.exports = { listExams, getExam, createExam, updateExam, deleteExam, setStatus, releaseResults, monitor, listAttempts, previewQuestions };

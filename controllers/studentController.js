@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
 const Semester = require('../models/Semester');
+const ExamAttempt = require('../models/ExamAttempt');
+const Result = require('../models/Result');
 const { env } = require('../config/env');
 const { ApiError, asyncHandler } = require('../middlewares/error');
 const { audit } = require('../middlewares/audit');
@@ -403,11 +405,43 @@ const exportStudents = asyncHandler(async (req, res) => {
   await audit(req, 'student.export', 'Student', '', `exported ${rows.length} students (xlsx)`);
 });
 
+// DELETE /api/students/:id
+const deleteStudent = asyncHandler(async (req, res) => {
+  if (!hasPermission(req.user, 'students.delete')) throw new ApiError(403, 'Missing permission: students.delete');
+  const student = await User.findOne({ _id: req.params.id, role: 'student' });
+  if (!student) throw new ApiError(404, 'Student not found');
+  await Promise.all([
+    ExamAttempt.deleteMany({ student: student._id }),
+    Result.deleteMany({ student: student._id }),
+    User.deleteOne({ _id: student._id }),
+  ]);
+  await audit(req, 'student.delete', 'Student', student._id, `deleted ${student.email}`);
+  res.json({ success: true, message: 'Student deleted' });
+});
+
+// POST /api/students/bulk-delete  { ids: [] }
+const bulkDeleteStudents = asyncHandler(async (req, res) => {
+  if (!hasPermission(req.user, 'students.delete')) throw new ApiError(403, 'Missing permission: students.delete');
+  const { ids } = req.body || {};
+  if (!Array.isArray(ids) || !ids.length) throw new ApiError(400, 'ids array required');
+  const valid = await User.find({ _id: { $in: ids }, role: 'student' }).select('_id').lean();
+  const userIds = valid.map((u) => u._id);
+  await Promise.all([
+    ExamAttempt.deleteMany({ student: { $in: userIds } }),
+    Result.deleteMany({ student: { $in: userIds } }),
+    User.deleteMany({ _id: { $in: userIds } }),
+  ]);
+  await audit(req, 'student.bulk_delete', 'Student', userIds.join(','), `deleted ${userIds.length} students`);
+  res.json({ success: true, data: { deleted: userIds.length } });
+});
+
 module.exports = {
   listStudents,
   getStudent,
   registerStudent,
   updateStudent,
+  deleteStudent,
+  bulkDeleteStudents,
   bulkStatus,
   resetPassword,
   downloadTemplate,

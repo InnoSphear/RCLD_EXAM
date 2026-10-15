@@ -9,6 +9,7 @@ router.get('/', authorizeRoles('superadmin', 'admin', 'subadmin'), c.listExams);
 router.post('/', requirePermission('exams.create'), c.createExam);
 router.get('/:id', authorizeRoles('superadmin', 'admin', 'subadmin'), c.getExam);
 router.put('/:id', requirePermission('exams.create'), c.updateExam);
+router.delete('/:id', requirePermission('exams.delete'), c.deleteExam);
 router.post('/:id/status', authorizeRoles('superadmin', 'admin', 'subadmin'), c.setStatus);
 router.post('/:id/release-results', requirePermission('exams.publish'), c.releaseResults);
 router.get('/:id/monitor', requirePermission('exams.monitor'), c.monitor);

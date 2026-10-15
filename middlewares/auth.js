@@ -26,7 +26,7 @@ function signRefreshToken(user) {
 }
 
 function setAuthCookies(res, accessToken, refreshToken) {
-  const common = { httpOnly: true, secure: env.COOKIE_SECURE, sameSite: 'lax' };
+  const common = { httpOnly: true, secure: env.COOKIE_SECURE, sameSite: env.COOKIE_SECURE ? 'none' : 'lax' };
   res.cookie('accessToken', accessToken, { ...common, maxAge: 12 * 60 * 60 * 1000 });
   res.cookie('refreshToken', refreshToken, { ...common, maxAge: env.JWT_REFRESH_TTL_DAYS * 24 * 60 * 60 * 1000, path: '/api/auth' });
 }
