@@ -1,5 +1,6 @@
 const Result = require('../models/Result');
 const Exam = require('../models/Exam');
+require('../models/Question');
 const { ApiError, asyncHandler } = require('../middlewares/error');
 const { audit } = require('../middlewares/audit');
 const { hasPermission } = require('../config/permissions');
@@ -81,11 +82,29 @@ const listResults = asyncHandler(async (req, res) => {
     { $sort: { submittedAt: -1 } },
     { $skip: (page - 1) * limit },
     { $limit: limit },
-    { $unset: ['evaluation', 'manualAdjustments'] },
     {
       $project: {
         studentDoc: { _id: 1, name: 1, studentId: 1, rollNumber: 1, email: 1, course: 1 },
         examDoc: { _id: 1, title: 1, durationMinutes: 1, resultsReleased: 1, resultRelease: 1 },
+        exam: 1,
+        attempt: 1,
+        student: 1,
+        semester: 1,
+        subject: 1,
+        status: 1,
+        totalQuestions: 1,
+        correct: 1,
+        incorrect: 1,
+        unanswered: 1,
+        marksObtained: 1,
+        maxMarks: 1,
+        percentage: 1,
+        passStatus: 1,
+        submittedAt: 1,
+        evaluatedAt: 1,
+        releasedAt: 1,
+        createdAt: 1,
+        updatedAt: 1,
       },
     }
   );
@@ -108,7 +127,8 @@ const getResult = asyncHandler(async (req, res) => {
     .populate('exam', 'title durationMinutes totalMarks resultsReleased resultRelease semester subject startsAt endsAt')
     .populate('semester', 'title number')
     .populate('subject', 'name code')
-    .populate('attempt', 'startedAt submittedAt deadline status attemptNumber');
+    .populate('attempt', 'startedAt submittedAt deadline status attemptNumber')
+    .populate('evaluation.question', 'statement type options correctAnswers explanation');
   if (!result) throw new ApiError(404, 'Result not found');
   if (isStudent && String(result.student._id) !== String(req.user._id)) {
     throw new ApiError(403, 'You cannot view another student\'s result');
