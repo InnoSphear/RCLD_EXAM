@@ -40,7 +40,11 @@ function errorHandler(err, req, res, next) {
   }
   console.error('[error]', err.message);
   if (process.env.NODE_ENV !== 'production') console.error(err.stack);
-  res.status(500).json({ success: false, message: 'Internal server error' });
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    ...(process.env.NODE_ENV !== 'production' ? { error: err.message } : {}),
+  });
 }
 
 const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

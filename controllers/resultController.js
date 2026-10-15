@@ -81,10 +81,9 @@ const listResults = asyncHandler(async (req, res) => {
     { $sort: { submittedAt: -1 } },
     { $skip: (page - 1) * limit },
     { $limit: limit },
+    { $unset: ['evaluation', 'manualAdjustments'] },
     {
       $project: {
-        evaluation: 0,
-        manualAdjustments: 0,
         studentDoc: { _id: 1, name: 1, studentId: 1, rollNumber: 1, email: 1, course: 1 },
         examDoc: { _id: 1, title: 1, durationMinutes: 1, resultsReleased: 1, resultRelease: 1 },
       },
