@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-const REQUIRED_IN_PROD = ['MONGODB_URI', 'JWT_SECRET', 'FRONTEND_URL'];
+const REQUIRED_IN_PROD = ['MONGODB_URI', 'JWT_SECRET'];
 
 function bool(v, dflt = false) {
   if (v === undefined || v === '') return dflt;
@@ -14,7 +14,7 @@ const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '5000', 10),
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/rcld_exam_portal',
-  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
+
   JWT_SECRET: process.env.JWT_SECRET || '',
   JWT_ACCESS_TTL: process.env.JWT_ACCESS_TTL || '12h',
   JWT_REFRESH_TTL_DAYS: parseInt(process.env.JWT_REFRESH_TTL_DAYS || '7', 10),

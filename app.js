@@ -21,27 +21,7 @@ function createApp() {
     })
   );
 
-  const allowedOrigins = [
-    env.FRONTEND_URL,
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:4173',
-    'http://127.0.0.1:4173',
-  ].filter(Boolean);
-
-  app.use(
-    cors({
-      // Reflect any origin when CORS_ALLOW_ALL is enabled (default), so every
-      // frontend URL is accepted while still supporting credentialed requests.
-      origin(origin, cb) {
-        if (!origin || env.CORS_ALLOW_ALL || allowedOrigins.includes(origin)) return cb(null, true);
-        return cb(null, false);
-      },
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    })
-  );
+  app.use(cors({ origin: true, credentials: true }));
 
   app.get("/word", (req,res)=>{
     res.send("Hello I am working properly");
